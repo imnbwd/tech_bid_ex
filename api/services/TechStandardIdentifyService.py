@@ -33,10 +33,11 @@ class TechStandardIdentifyService(ServiceBase):
 
         try:
             # 加载模型
-            logger.warning(f"当前目录： {os.getcwd()}")
-            self.model = joblib.load('../training/saved_models/tech_standard_model.joblib')
+            logger.info(f"当前目录： {os.getcwd()}")
+            prefix = "../" if os.getcwd().endswith("api") else ""
+            self.model = joblib.load(prefix + '/training/saved_models/tech_standard_model.joblib')
             # 加载vectorizer
-            self.vectorizer = joblib.load('../training/saved_models/tech_standard_vectorizer.joblib')
+            self.vectorizer = joblib.load(prefix + '/training/saved_models/tech_standard_vectorizer.joblib')
         except Exception as e:
             logger.exception(e)
 
