@@ -19,6 +19,7 @@ class TechStandardIdentifyService(ServiceBase):
         return cls._instance
 
     def __init__(self):
+        logger.info("实例化TechStandardIdentifyService")
         if not self._is_initialized:
             self._load_model()
             TechStandardIdentifyService._is_initialized = True
