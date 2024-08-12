@@ -4,7 +4,7 @@ from loguru import logger
 from numpy import ndarray
 from api.services.ServiceBase import ServiceBase
 from typing import Optional, Tuple
-
+import os
 
 class TechStandardIdentifyService(ServiceBase):
     """
@@ -31,6 +31,7 @@ class TechStandardIdentifyService(ServiceBase):
 
         try:
             # 加载模型
+            print(f"当前目录： {os.getcwd()}")
             self.model = joblib.load('../training/saved_models/tech_standard_model.joblib')
             # 加载vectorizer
             self.vectorizer = joblib.load('../training/saved_models/tech_standard_vectorizer.joblib')
