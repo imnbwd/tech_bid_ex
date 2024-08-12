@@ -1,6 +1,4 @@
 import joblib
-from api.utility import HttpUtils
-import json
 from api.model import DocRoot, DocumentGroup, Document
 from loguru import logger
 from numpy import ndarray
