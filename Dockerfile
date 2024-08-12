@@ -8,7 +8,7 @@ WORKDIR /app
 COPY requirements.txt .
 
 # 设置源
-RUN pip config set global.index-url https://mirrors.aliyun.com/pypi/simple
+RUN pip config set global.index-url https://mirrors.163.com/pypi/simple/
 
 # 安装 Python 依赖
 RUN pip install --no-cache-dir -r requirements.txt
