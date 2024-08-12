@@ -7,6 +7,9 @@ WORKDIR /app
 # 复制 requirements.txt 到容器中
 COPY requirements.txt .
 
+# 设置源
+RUN pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+
 # 安装 Python 依赖
 RUN pip install --no-cache-dir -r requirements.txt
 
