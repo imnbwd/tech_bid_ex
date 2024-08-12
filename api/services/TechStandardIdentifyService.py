@@ -6,6 +6,7 @@ from api.services.ServiceBase import ServiceBase
 from typing import Optional, Tuple
 import os
 
+
 class TechStandardIdentifyService(ServiceBase):
     """
     技术标准提取服务
@@ -68,9 +69,9 @@ class TechStandardIdentifyService(ServiceBase):
                     # 将原文档中的段落转化为字符串列表以准备检查
                     doc_paragraphs: list[str] = [para.text for para in doc_data.paragraphs]
                     # 文本转为向量
-                    para_vectors = self.get_vectorizer().transform(doc_paragraphs)
+                    para_vectors = self.vectorizer.transform(doc_paragraphs)
                     # 使用模型预测
-                    doc_check_result: ndarray = self.get_model().predict(para_vectors)
+                    doc_check_result: ndarray = self.model.predict(para_vectors)
                     for index, value in enumerate(doc_check_result):
                         if value == 1:
                             # 往结果对象中添加原文档中的段落
