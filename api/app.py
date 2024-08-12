@@ -1,9 +1,9 @@
 from flask import Flask, request, jsonify, Response
-from model import Result
+from api.model import Result
 from loguru import logger
 from services import InfoExtractionService, TechStandardIdentifyService,InvalidContentIdentifyService
 from concurrent.futures import ThreadPoolExecutor
-from app_const import ServiceType
+from api.app_const import ServiceType
 
 app = Flask(__name__)
 executor = ThreadPoolExecutor(max_workers=20)  # 创建一个线程池，设置最大线程数
