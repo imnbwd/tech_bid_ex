@@ -1,4 +1,4 @@
-from paddlenlp import Taskflow
+# from paddlenlp import Taskflow
 
 
 class UieHelper:
@@ -6,7 +6,7 @@ class UieHelper:
 
     def __init__(self, schema=None):
         self.__schema = schema
-        self.__ie = Taskflow("information_extraction", schema=schema, task_path ="../tm")
+        # self.__ie = Taskflow("information_extraction", schema=schema, task_path ="../tm")
 
     @classmethod
     def get_instance(cls, schema=None):
@@ -21,7 +21,8 @@ class UieHelper:
 
     def set_schema(self, schema):
         self.__schema = schema
-        self.__ie.set_schema(schema)
+        # self.__ie.set_schema(schema)
 
     def extract(self, text):
-        return self.__ie(text)
+        return "Ok"
+        # return self.__ie(text)
