@@ -96,13 +96,11 @@ class InvalidContentIdentifyService(ServiceBase):
                 tech_standard_identify = TechStandardIdentifyService()
                 ts_result, ts_message = tech_standard_identify.identify(original_doc_root)
                 if ts_result is not None:
-                    result_dict[option] = ts_result
+                    result_dict[option] = DocRoot.serialize(ts_result)
             elif option == InvalidContentType.TABLE_OF_CONTENT.value:
                 tech_standard_identify = TechStandardIdentifyService()
                 ts_result, ts_message = tech_standard_identify.identify(original_doc_root)
                 if ts_result is not None:
-                    result_dict[option] = ts_result
+                    result_dict[option] = DocRoot.serialize(ts_result)
 
-        super().notify_success_with_data(notify_url, task_id,
-                                         json.dumps(result_dict, default=DocRoot.serialize, ensure_ascii=False,
-                                                    indent=4))
+        super().notify_success_with_data(notify_url, task_id, result_dict)

@@ -65,7 +65,7 @@ class ServiceBase:
         except Exception as e:
             logger.error(f"回调请求失败，task_id: {task_id}，详细信息：{str(e)}")
 
-    def notify_success_with_data(self, notify_url: str, task_id: str, data: str) -> None:
+    def notify_success_with_data(self, notify_url: str, task_id: str, data) -> None:
         """
         回调成功
         :param notify_url:
