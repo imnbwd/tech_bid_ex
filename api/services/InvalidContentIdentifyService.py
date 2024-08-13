@@ -4,7 +4,6 @@ from api.model import DocRoot
 from api.services.ServiceBase import ServiceBase
 from api.services.TechStandardIdentifyService import TechStandardIdentifyService
 from api.app_const import InvalidContentType
-from typing import Optional, Tuple
 
 
 class InvalidContentIdentifyService(ServiceBase):
@@ -52,10 +51,6 @@ class InvalidContentIdentifyService(ServiceBase):
                     result_dict[option] = DocRoot.serialize(ts_result)
 
         return result_dict, None
-
-        # super().notify_success_with_data(notify_url, task_id,
-        #                                  json.dumps(result_dict, default=DocRoot.serialize, ensure_ascii=False, indent=4))
-
 
     def process(self, url: str, notify_url: str, task_id: str, options: []) -> None:
         """
@@ -109,4 +104,5 @@ class InvalidContentIdentifyService(ServiceBase):
                     result_dict[option] = ts_result
 
         super().notify_success_with_data(notify_url, task_id,
-                                         json.dumps(result_dict, default=DocRoot.serialize, ensure_ascii=False, indent=4))
+                                         json.dumps(result_dict, default=DocRoot.serialize, ensure_ascii=False,
+                                                    indent=4))
