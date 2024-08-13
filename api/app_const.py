@@ -4,6 +4,9 @@ from typing import Optional
 SUCCESS_CODE = 10000
 
 
+STR_ONE = "1"
+STR_ZERO = "0"
+
 class ServiceType(Enum):
     """
     服务类型枚举

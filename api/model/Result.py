@@ -22,11 +22,34 @@ class Result:
             'data': self.data
         }
 
+
+
     @staticmethod
-    def default_success(message):
+    def success_default(message):
         """
         返回一个默认的成功Result对象
         :param message: 消息
         :return:
         """
         return Result(SUCCESS_CODE, message)
+
+    @staticmethod
+    def success_with_data(message: str, data):
+        """
+        返回一个默认的成功Result对象
+        :param message: 消息
+        :param message: 数据
+        :return:
+        """
+        result = Result(SUCCESS_CODE, message)
+        result.data = data
+        return result
+
+    @staticmethod
+    def fail_default(message):
+        """
+        返回一个默认的失败Result对象
+        :param message: 消息
+        :return:
+        """
+        return Result(-1, message)
