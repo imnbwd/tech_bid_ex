@@ -1,24 +1,27 @@
-import pandas as pd
-import matplotlib.pyplot as plt
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import classification_report
+from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
+import joblib
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics import classification_report
-from sklearn.metrics import precision_score, recall_score, f1_score
-import joblib
 from api.utility import TextUtils
+import pandas as pd
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 
-class TechStandardTraining:
+class TocTraining:
+    """
+    目录训练
+    """
+
     # 模型文件路径
-    MODEL_PATH = "./saved_models/tech_standard_model.joblib"
+    MODEL_PATH = "./saved_models/toc_model.joblib"
 
     # 词向量文件路径
-    VECTORIZER_PATH = "./saved_models/tech_standard_vectorizer.joblib"
-
-    def __init__(self):
-        pass
+    VECTORIZER_PATH = "./saved_models/toc_vectorizer.joblib"
 
     def load_training_data(self, file_path: str) -> list:
         training_data = []
@@ -33,50 +36,6 @@ class TechStandardTraining:
                 training_data.append({"content": content, "label": label})
 
         return training_data
-
-    # @staticmethod
-    # def chinese_tokenizer(text):
-    #     """
-    #     使用 jieba 分词
-    #     :param text:
-    #     :return:
-    #     """
-    #     return jieba.lcut(text)
-
-    def show_data_plot(self, training_data: []):
-        """
-        显示源数据的比例图
-        :param training_data: 读取后的训练数据
-        :return:
-        """
-        # 统计label列中0和1的数量
-        # 统计label为0和1的数量
-        label_counts = {0: 0, 1: 0}
-
-        for data in training_data:
-            label = data['label']
-            if label in label_counts:
-                label_counts[label] += 1
-
-        # 使用Matplotlib绘制比例图
-        labels = list(label_counts.keys())
-        counts = list(label_counts.values())
-
-        # 绘制矩形图（柱状图）
-        plt.figure(figsize=(8, 6))
-        plt.bar(labels, counts, color=['skyblue', 'lightgreen'])
-
-        # 设置标题和标签
-        plt.title('Proportion of Labels 0 and 1')
-        plt.xlabel('Label')
-        plt.ylabel('Count')
-
-        # 显示每个柱子的数量
-        for i, count in enumerate(counts):
-            plt.text(labels[i], count + 0.05, str(count), ha='center', va='bottom')
-
-        plt.xticks(labels)  # 设置x轴刻度
-        plt.show()
 
     def train(self, file_name: str) -> None:
         training_data = self.load_training_data(file_name)
@@ -106,15 +65,6 @@ class TechStandardTraining:
             'max_features': ['auto', 'sqrt', 'log2']
         }
 
-        # 逻辑回归参数
-        # param_grid = {
-        #     'penalty': ['l1', 'l2', 'elasticnet', 'none'],
-        #     'C': [0.1, 1, 10, 100],
-        #     'solver': ['newton-cg', 'lbfgs', 'liblinear', 'sag', 'saga'],
-        #     'max_iter': [100, 200, 500],
-        #     'class_weight': [None, 'balanced']
-        # }
-
         # 初始化网格搜索
         grid_search = GridSearchCV(estimator=model, param_grid=param_grid,
                                    cv=5, n_jobs=-1, verbose=2)
@@ -125,9 +75,6 @@ class TechStandardTraining:
         # 使用最佳参数在测试集上进行预测
         best_rf = grid_search.best_estimator_
         y_pred = best_rf.predict(X_test)
-
-        # model.fit(X_train, y_train)
-        # y_pred = model.predict(X_test)
 
         # 计算精确度、召回率和F1值
         precision = precision_score(y_test, y_pred, average='weighted')
@@ -143,7 +90,66 @@ class TechStandardTraining:
         print(classification_report(y_test, y_pred))
 
         # 保存模型
-        joblib.dump(best_rf, TechStandardTraining.MODEL_PATH)
+        joblib.dump(best_rf, TocTraining.MODEL_PATH)
 
         # 保存vectorizer
-        joblib.dump(vectorizer, TechStandardTraining.VECTORIZER_PATH)
+        joblib.dump(vectorizer, TocTraining.VECTORIZER_PATH)
+
+    def train_with_multi_models(self, file_name: str) -> None:
+        training_data = self.load_training_data(file_name)
+
+        # 将数据转换为特征和标签
+        X = [row["content"] for row in training_data]
+        y = [row["label"] for row in training_data]
+
+        # 使用TF-IDF向量化文本特征
+        vectorizer = TfidfVectorizer(tokenizer=TextUtils.chinese_tokenizer, max_features=1500)
+        X_vectorized = vectorizer.fit_transform([' '.join(map(str, row)) for row in X])
+
+        # 划分训练集和测试集
+        X_train, X_test, y_train, y_test = train_test_split(X_vectorized, y, test_size=0.2, random_state=42)
+
+        # 定义多个模型
+        models = {
+            'Logistic Regression': LogisticRegression(),
+            'SVM': SVC(),
+            'Random Forest': RandomForestClassifier()
+        }
+
+        # 用于存储结果的字典
+        results = {}
+
+        for model_name, model in models.items():
+            # 训练模型
+            model.fit(X_train, y_train)
+
+            # 预测
+            y_pred = model.predict(X_test)
+
+            # 计算性能指标
+            accuracy = accuracy_score(y_test, y_pred)
+            report = classification_report(y_test, y_pred, output_dict=True)
+
+            # 存储结果
+            results[model_name] = {
+                'accuracy': accuracy,
+                'classification_report': report
+            }
+
+        # 输出各模型的结果
+        for model_name, result in results.items():
+            print(f"Model: {model_name}")
+            print(f"Accuracy: {result['accuracy']:.4f}")
+            print(f"Classification Report: {result['classification_report']}\n")
+
+        # 将结果转换为DataFrame以便绘图
+        result_df = pd.DataFrame({
+            'Model': list(results.keys()),
+            'Accuracy': [result['accuracy'] for result in results.values()]
+        })
+
+        # 绘制条形图比较各个模型的准确率
+        plt.figure(figsize=(10, 6))
+        sns.barplot(x='Accuracy', y='Model', data=result_df, palette='viridis')
+        plt.title('Model Comparison - Accuracy')
+        plt.show()

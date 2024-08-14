@@ -1,1 +1,2 @@
 from .TechStandardTraining import TechStandardTraining
+from .TocTraining import TocTraining

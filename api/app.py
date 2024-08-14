@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, Response
 from api.model import Result
 from loguru import logger
-from api.services import InfoExtractionService, TechStandardIdentifyService, InvalidContentIdentifyService
+from api.services import InfoExtractionService, InvalidContentIdentifyService
 from concurrent.futures import ThreadPoolExecutor
 from api.app_const import ServiceType, STR_ONE
 
