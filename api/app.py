@@ -131,8 +131,8 @@ def handle_service_invalid_content_identify(url: str, notify_url: str, task_id: 
             return jsonify(Result.success_with_data("检查完成", data=check_result).to_dict())
     else:
         # 异步方式
-        invalid_content_identify.process(url, notify_url, task_id, check_option)
-        # executor.submit(tech_standard_identify.process, url, notify_url, task_id)
+        # invalid_content_identify.process(url, notify_url, task_id, check_option)
+        executor.submit(invalid_content_identify.process, url, notify_url, task_id, check_option)
         return jsonify(Result.success_default("请求成功").to_dict())
 
 

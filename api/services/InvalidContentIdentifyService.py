@@ -99,8 +99,8 @@ class InvalidContentIdentifyService(ServiceBase):
                 if ts_result is not None:
                     result_dict[option] = DocRoot.serialize(ts_result)
             elif option == InvalidContentType.TABLE_OF_CONTENT.value:
-                tech_standard_identify = TechStandardIdentifyService()
-                ts_result, ts_message = tech_standard_identify.identify(original_doc_root)
+                toc_identify = TOCIdentifyService()
+                ts_result, ts_message = toc_identify.identify(original_doc_root)
                 if ts_result is not None:
                     result_dict[option] = DocRoot.serialize(ts_result)
 
