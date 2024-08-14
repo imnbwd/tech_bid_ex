@@ -17,7 +17,7 @@ class TOCIdentifyService(ServiceBase):
         return cls._instance
 
     def __init__(self):
-        logger.info("实例化TechStandardIdentifyService")
+        logger.info("实例化TOCIdentifyService")
         if not self._is_initialized:
             self._load_model()
             TOCIdentifyService._is_initialized = True
@@ -35,8 +35,17 @@ class TOCIdentifyService(ServiceBase):
             self.model = joblib.load(prefix + 'training/saved_models/toc_model.joblib')
             # 加载vectorizer
             self.vectorizer = joblib.load(prefix + 'training/saved_models/toc_vectorizer.joblib')
+            logger.info(f"加载模型成功")
         except Exception as e:
             logger.exception(e)
+
+    @property
+    def get_model(self):
+        return self.model
+
+    @property
+    def get_vectorizer(self):
+        return self.vectorizer
 
     def predict(self, content: str):
         content_vectored = self.vectorizer.transform(content)
