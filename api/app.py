@@ -17,7 +17,8 @@ executor = ThreadPoolExecutor(max_workers=20)  # 创建一个线程池，设置�
 
 # 初始化 Limiter
 limiter = Limiter(
-    app,
+    get_remote_address,
+    app=app,
     default_limits=["1000 per hour"]
 )
 
