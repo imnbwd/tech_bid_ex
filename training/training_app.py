@@ -32,14 +32,15 @@ def load_and_test_tech_standard_model() -> None:
     :return:
     """
     tech_standard_testing = TechStandardTesting()
-    tech_standard_testing.load_and_test_model()
+    tech_standard_testing.perf_test2()
 
 
 def main() -> None:
     # 训练技术标准模型
-    train_model_tech_standard()
+    # train_model_tech_standard()
+    # train_model_toc()
     # 测试技术标准模型
-    # load_and_test_tech_standard_model()
+    load_and_test_tech_standard_model()
 
 
 if __name__ == "__main__":

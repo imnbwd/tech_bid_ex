@@ -3,9 +3,15 @@ from typing import Optional
 
 SUCCESS_CODE = 10000
 
-
 STR_ONE = "1"
 STR_ZERO = "0"
+
+users = {
+    "yqb": {"credential": "7Kj#mRpL9q@X"}
+}
+
+APP_SECRET_KEY = "'3a7e9be1f92e27d227de4548214d7c393bc2325b0b1f8e5e4b0c81574c7bc5d6'"
+
 
 class ServiceType(Enum):
     """

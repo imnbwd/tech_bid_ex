@@ -3,25 +3,93 @@ from api.model import Result
 from loguru import logger
 from api.services import InfoExtractionService, InvalidContentIdentifyService
 from concurrent.futures import ThreadPoolExecutor
-from api.app_const import ServiceType, STR_ONE
+from api.app_const import ServiceType, STR_ONE, users, APP_SECRET_KEY
+from functools import wraps
+import jwt
+import datetime
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = APP_SECRET_KEY
+
 executor = ThreadPoolExecutor(max_workers=20)  # 创建一个线程池，设置最大线程数
 
+# 初始化 Limiter
+limiter = Limiter(
+    app,
+    default_limits=["1000 per hour"]
+)
 
-# limiter = Limiter(
-#     app,
-#     key_func=get_remote_address,
-#     default_limits=["200 per day", "50 per hour"]
-# )
+
+def generate_token(client_id):
+    """
+    生成Toekn
+    :param client_id: Client_ID信息
+    :return:
+    """
+    payload = {
+        'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1),
+        'iat': datetime.datetime.utcnow(),
+        'sub': client_id
+    }
+    return jwt.encode(payload, app.config['SECRET_KEY'], algorithm='HS256')
+
+
+def requires_auth(f):
+    """
+    认证decorator
+    :param f:
+    :return:
+    """
+
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.headers.get('Authorization')
+        if not token:
+            return jsonify({"message": "Authentication required"}), 401
+        try:
+            token = token.split()[1]  # Remove "Bearer" prefix
+            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            return jsonify({"message": "Token has expired"}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({"message": "Invalid token"}), 401
+        return f(*args, **kwargs)
+
+    return decorated
+
+
+@app.route('/auth/get_token', methods=['POST'])
+def login():
+    """
+    获取Token
+    :return:
+    """
+    if request.json['client_id'] in users and request.json['client_credential'] == users[request.json['client_id']][
+        'credential']:
+        token = generate_token(request.json['client_id'])
+        return jsonify({"token": token})
+    return jsonify({"message": "Invalid credentials"}), 401
+
+
+# 处理超出限流的请求
+@app.errorhandler(429)
+def ratelimit_handler(e):
+    return jsonify({"error": "rate limit exceeded"}), 429
 
 
 @app.route('/health', methods=['GET'])
 def health() -> Response:
+    """
+    健康探测接口
+    :return:
+    """
     return jsonify("OK")
 
 
 @app.route('/service', methods=['POST'])
+@requires_auth
 def service() -> Response:
     """
     技术标智能相关服务
