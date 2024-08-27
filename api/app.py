@@ -12,6 +12,7 @@ from flask_limiter.util import get_remote_address
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = APP_SECRET_KEY
+app.config['JSON_AS_ASCII'] = False
 
 executor = ThreadPoolExecutor(max_workers=20)  # 创建一个线程池，设置最大线程数
 
