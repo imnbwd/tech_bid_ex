@@ -91,7 +91,7 @@ def health() -> Response:
 
 
 @app.route('/service', methods=['POST'])
-@requires_auth
+# @requires_auth
 def service() -> Response:
     """
     技术标智能相关服务

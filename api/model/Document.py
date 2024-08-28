@@ -1,12 +1,13 @@
 from dataclasses import dataclass, field, asdict
 from typing import List, Dict, Any, Optional
 import json
+from loguru import logger
 
 
 @dataclass
 class Paragraph:
-    id: int
-    page: int
+    id: str
+    page: str
     text: str
 
     def to_dict(self) -> Dict[str, Any]:
@@ -56,8 +57,8 @@ class DocRoot:
                 for doc_id, doc_data in group_data.items():
                     paragraphs = [
                         Paragraph(
-                            id=int(paragraph.get("id", 0)),
-                            page=int(paragraph.get("page", 0)),
+                            id=paragraph.get("id", ""),
+                            page=paragraph.get("page", ""),
                             text=paragraph.get("text", "")
                         )
                         for paragraph in doc_data.get("paragraphs", [])
@@ -65,7 +66,8 @@ class DocRoot:
                     documents[doc_id] = Document(paragraphs=paragraphs)
                 document_groups[group_id] = DocumentGroup(documents=documents)
             return DocRoot(document_groups=document_groups)
-        except Exception:
+        except Exception as e:
+            logger.error(e)
             return None
 
     def to_json(self) -> str:
