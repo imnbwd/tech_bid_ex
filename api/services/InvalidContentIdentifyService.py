@@ -86,7 +86,7 @@ class InvalidContentIdentifyService(ServiceBase):
         try:
             # 解析文件
             json_data = json.loads(data[0])
-            original_doc_root = DocRoot.parse_json_to_dataclasses(json_data, version)  # 原始标书数据
+            original_doc_root = DocRoot.parse_json_to_dataclasses(json_data, include_group_id=False if version == 2 else True)  # 原始标书数据
         except Exception as e:
             # 解析文件失败
             logger.error(e)
