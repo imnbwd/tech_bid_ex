@@ -1,6 +1,7 @@
 from api.utility import HttpUtils
 import json
 from api.model import DocRoot
+from loguru import logger
 from api.services.ServiceBase import ServiceBase
 from api.services.TOCIdentifyService import TOCIdentifyService
 from api.services.TechStandardIdentifyService import TechStandardIdentifyService
@@ -12,7 +13,7 @@ class InvalidContentIdentifyService(ServiceBase):
     无效内容识别服务
     """
 
-    def process_sync(self, url: str, notify_url: str, task_id: str, options: []):
+    def process_sync(self, url: str, notify_url: str, task_id: str, options: [], version: int):
         # 去重
         final_options = set(options)
         # 判断options中至少有一个有效的检查项
@@ -29,9 +30,11 @@ class InvalidContentIdentifyService(ServiceBase):
         try:
             # 解析文件
             json_data = json.loads(data[0])
-            original_doc_root = DocRoot.parse_json_to_dataclasses(json_data)  # 原始标书数据
-        except Exception:
+            original_doc_root = DocRoot.parse_json_to_dataclasses(json_data,
+                                                                  include_group_id=False if version == 2 else True)  # 原始标书数据
+        except Exception as e:
             # 解析文件失败
+            logger.error(e)
             is_valid_json = False
 
         if not is_valid_json or original_doc_root is None:
@@ -39,21 +42,23 @@ class InvalidContentIdentifyService(ServiceBase):
 
         # 通过预检查（文件下载与解析），开始逐项进行检查
         result_dict = {}
+        include_group_id = False if version == 2 else True  # 序列化时是否包含GroupId
+
         for option in final_options:
             if option == InvalidContentType.TECH_STANDARD.value:
                 tech_standard_identify = TechStandardIdentifyService()
                 ts_result, ts_message = tech_standard_identify.identify(original_doc_root)
                 if ts_result is not None:
-                    result_dict[option] = DocRoot.serialize(ts_result)
+                    result_dict[option] = DocRoot.serialize(ts_result, include_group_id=include_group_id)
             elif option == InvalidContentType.TABLE_OF_CONTENT.value:
                 toc_identify = TOCIdentifyService()
                 ts_result, ts_message = toc_identify.identify(original_doc_root)
                 if ts_result is not None:
-                    result_dict[option] = DocRoot.serialize(ts_result)
+                    result_dict[option] = DocRoot.serialize(ts_result, include_group_id=include_group_id)
 
         return result_dict, None
 
-    def process(self, url: str, notify_url: str, task_id: str, options: []) -> None:
+    def process(self, url: str, notify_url: str, task_id: str, options: [], version: int) -> None:
         """
         处理（调用相应的服务）
         :param url:
@@ -81,9 +86,10 @@ class InvalidContentIdentifyService(ServiceBase):
         try:
             # 解析文件
             json_data = json.loads(data[0])
-            original_doc_root = DocRoot.parse_json_to_dataclasses(json_data)  # 原始标书数据
-        except Exception:
+            original_doc_root = DocRoot.parse_json_to_dataclasses(json_data, version)  # 原始标书数据
+        except Exception as e:
             # 解析文件失败
+            logger.error(e)
             is_valid_json = False
 
         if not is_valid_json or original_doc_root is None:
@@ -92,16 +98,17 @@ class InvalidContentIdentifyService(ServiceBase):
 
         # 通过预检查（文件下载与解析），开始逐项进行检查
         result_dict = {}
+        include_group_id = False if version == 2 else True  # 序列化时是否包含GroupId
         for option in final_options:
             if option == InvalidContentType.TECH_STANDARD.value:
                 tech_standard_identify = TechStandardIdentifyService()
                 ts_result, ts_message = tech_standard_identify.identify(original_doc_root)
                 if ts_result is not None:
-                    result_dict[option] = DocRoot.serialize(ts_result)
+                    result_dict[option] = DocRoot.serialize(ts_result, include_group_id)
             elif option == InvalidContentType.TABLE_OF_CONTENT.value:
                 toc_identify = TOCIdentifyService()
                 ts_result, ts_message = toc_identify.identify(original_doc_root)
                 if ts_result is not None:
-                    result_dict[option] = DocRoot.serialize(ts_result)
+                    result_dict[option] = DocRoot.serialize(ts_result, include_group_id)
 
         super().notify_success_with_data(notify_url, task_id, result_dict)

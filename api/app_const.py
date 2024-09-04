@@ -6,6 +6,7 @@ SUCCESS_CODE = 10000
 STR_ONE = "1"
 STR_ZERO = "0"
 
+
 users = {
     "yqb": {"credential": "7Kj#mRpL9q@X"}
 }

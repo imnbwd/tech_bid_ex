@@ -12,7 +12,7 @@ from flask_limiter.util import get_remote_address
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = APP_SECRET_KEY
-app.config['JSON_AS_ASCII'] = False # 禁用 ASCII 转义
+app.config['JSON_AS_ASCII'] = False  # 禁用 ASCII 转义
 
 executor = ThreadPoolExecutor(max_workers=20)  # 创建一个线程池，设置最大线程数
 
@@ -123,7 +123,14 @@ def service() -> Response:
         is_sync = True if is_sync_str is not None and is_sync_str == STR_ONE else False
         if not is_sync and not notify_url:
             return jsonify(Result(-1, "缺少notify_url").to_dict())
-        return handle_service_invalid_content_identify(url, notify_url, task_id, is_sync=is_sync)
+
+        # 增加版本(v1版维持原来的数据结果（入参与出参），v2版在原来的基础上少一层，少group_id）
+        version = request.args.get('v')
+        if version is None or version != str(2):
+            version = 1
+        else:
+            version = int(version)
+        return handle_service_invalid_content_identify(url, notify_url, task_id, is_sync=is_sync, version=version)
     else:
         return jsonify(Result(101, "ServiceId不正确").to_dict())
 
@@ -168,7 +175,10 @@ def handle_service_info_extracted(url: str, notify_url: str, task_id: str) -> Re
     return jsonify(Result.success_default("请求成功").to_dict())
 
 
-def handle_service_invalid_content_identify(url: str, notify_url: str, task_id: str, is_sync: bool = False) -> Response:
+def handle_service_invalid_content_identify(url: str, notify_url: str,
+                                            task_id: str,
+                                            is_sync: bool = False,
+                                            version: int = 1) -> Response:
     """
     无效内容识别服务
     :param url: 文件URL
@@ -191,7 +201,8 @@ def handle_service_invalid_content_identify(url: str, notify_url: str, task_id: 
 
     if is_sync:
         # 同步方式
-        check_result, check_message = invalid_content_identify.process_sync(url, notify_url, task_id, check_option)
+        check_result, check_message = invalid_content_identify.process_sync(url, notify_url, task_id, check_option,
+                                                                            version)
         if check_result is None:
             # 失败
             msg = check_message if check_message is not None and len(check_message) > 0 else "检查失败"
@@ -202,7 +213,7 @@ def handle_service_invalid_content_identify(url: str, notify_url: str, task_id: 
     else:
         # 异步方式
         # invalid_content_identify.process(url, notify_url, task_id, check_option)
-        executor.submit(invalid_content_identify.process, url, notify_url, task_id, check_option)
+        executor.submit(invalid_content_identify.process, url, notify_url, task_id, check_option, version)
         return jsonify(Result.success_default("请求成功").to_dict())
 
 
