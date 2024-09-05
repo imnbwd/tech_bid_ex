@@ -37,10 +37,10 @@ def load_and_test_tech_standard_model() -> None:
 
 def main() -> None:
     # 训练技术标准模型
-    # train_model_tech_standard()
+    train_model_tech_standard()
     # train_model_toc()
     # 测试技术标准模型
-    load_and_test_tech_standard_model()
+    # load_and_test_tech_standard_model()
 
 
 if __name__ == "__main__":
