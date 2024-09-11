@@ -86,7 +86,7 @@ class TechStandardTraining:
         y = [row["label"] for row in training_data]
 
         # 使用TF-IDF向量化文本特征
-        vectorizer = TfidfVectorizer(tokenizer=TextUtils.chinese_tokenizer, max_features=1500)
+        vectorizer = TfidfVectorizer(tokenizer=TextUtils.chinese_tokenizer, max_features=2000)
         X_vectorized = vectorizer.fit_transform([' '.join(map(str, row)) for row in X])
 
         # 划分训练集和测试集
@@ -99,8 +99,8 @@ class TechStandardTraining:
 
         # 定义参数网格
         param_grid = {
-            'n_estimators': [50, 100, 200],
-            'max_depth': [None, 10, 20, 30],
+            'n_estimators': [50, 100, 200, 500],
+            'max_depth': [None, 5, 10, 20, 30],
             'min_samples_split': [2, 5, 10],
             'min_samples_leaf': [1, 2, 4],
             'max_features': ['auto', 'sqrt', 'log2']
