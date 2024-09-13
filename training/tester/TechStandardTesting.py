@@ -3,8 +3,11 @@ import joblib
 from training.trainer.TechStandardTraining import TechStandardTraining
 from training.trainer.TocTraining import TocTraining
 import json
-from typing import Any
+import scipy.sparse as sp
 import time
+from api.utility import TextUtils
+from sklearn.feature_selection import SelectKBest, f_classif
+import numpy as np
 
 
 def extract_texts_from_json(json_data) -> list[str]:
@@ -36,16 +39,28 @@ class TechStandardTesting:
 
         print("加载模型成功")
         files = []
-        files.append(r"D:\标书\技术标\text\56延安宏庆油气工程有限公司.json")
+        files.append(r"F:\保利国际广场项目土建及水电安装工程技术标-合稿.json")
+        files.append(r"F:\电力领域.json")
 
         for file_path in files:
             json_data = read_json_file(file_path)
             texts = [text for text in extract_texts_from_json(json_data) if text.strip()]
             vectors = vectorizer.transform(texts)
+
+            custom_features = [TextUtils.extract_tech_standard_features(row[0]) for row in texts]
+            vectors = sp.hstack((vectors, custom_features))
+
+            # 使用特征选择
+            feature_indices = np.load(TechStandardTraining.FEATURE_INDEX_PATH)
+            vectors = vectors.toarray()[:, feature_indices]
+
             prediction = model.predict(vectors)
+            for i, text in enumerate(texts):
+                if TextUtils.fit_tech_standard_pattern(text):
+                    prediction[i] = 1
 
             for index, value in enumerate(prediction):
-                print(f"{texts[index]}, predict:[{value}]")
+                print(f"{texts[index]}, predict:[{value}]\n")
                 # if value == 1:
                 #     
                 # else:

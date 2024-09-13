@@ -5,6 +5,7 @@ from numpy import ndarray
 from api.services.ServiceBase import ServiceBase
 from typing import Optional, Tuple
 import os
+from api.utility import TextUtils
 
 
 class TechStandardIdentifyService(ServiceBase):
@@ -73,6 +74,12 @@ class TechStandardIdentifyService(ServiceBase):
                     para_vectors = self.vectorizer.transform(doc_paragraphs)
                     # 使用模型预测
                     doc_check_result: ndarray = self.model.predict(para_vectors)
+
+                    # 进一步判断（提高召回率）
+                    for i, text in enumerate(doc_paragraphs):
+                        if TextUtils.fit_tech_standard_pattern(text):
+                            doc_check_result[i] = 1
+
                     for index, value in enumerate(doc_check_result):
                         if value == 1:
                             # 往结果对象中添加原文档中的段落

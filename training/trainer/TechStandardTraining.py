@@ -1,13 +1,19 @@
+import re
+
 import pandas as pd
 import matplotlib.pyplot as plt
+from sklearn.svm import SVC
+import numpy as np
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import VotingClassifier
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import classification_report
 from sklearn.metrics import precision_score, recall_score, f1_score
 import joblib
+import scipy.sparse as sp
 from api.utility import TextUtils
+from sklearn.feature_selection import SelectKBest, f_classif
 
 
 class TechStandardTraining:
@@ -16,6 +22,9 @@ class TechStandardTraining:
 
     # 词向量文件路径
     VECTORIZER_PATH = "./saved_models/tech_standard_vectorizer.joblib"
+
+    # 特征索引文件
+    FEATURE_INDEX_PATH = "./saved_models/tech_standard_features.npy"
 
     def __init__(self):
         pass
@@ -86,45 +95,54 @@ class TechStandardTraining:
         y = [row["label"] for row in training_data]
 
         # 使用TF-IDF向量化文本特征
-        vectorizer = TfidfVectorizer(tokenizer=TextUtils.chinese_tokenizer, max_features=2000)
+        vectorizer = TfidfVectorizer(tokenizer=TextUtils.chinese_tokenizer, max_features=None)
         X_vectorized = vectorizer.fit_transform([' '.join(map(str, row)) for row in X])
 
-        # 划分训练集和测试集
-        X_train, X_test, y_train, y_test = train_test_split(X_vectorized, y, test_size=0.2, random_state=42)
+        custom_features = [TextUtils.extract_tech_standard_features(row[0]) for row in X]
+        X_vectorized = sp.hstack((X_vectorized, custom_features))
+
+        # 使用特征选择
+        selector = SelectKBest(f_classif, k=500)  # 选择前n个最重要的特征
+        X_selected = selector.fit_transform(X_vectorized, y)
+        feature_indices = selector.get_support(indices=True)
+
+        # 划分训练集和测试集0
+        X_train, X_test, y_train, y_test = train_test_split(X_selected, y, test_size=0.2, random_state=42)
 
         # 训练模型
-        # model = RandomForestClassifier(n_estimators=100, max_depth=10, min_samples_split=5, min_samples_leaf=2,
-        #                                random_state=42)
-        model = RandomForestClassifier(random_state=42)
+        # model = SVC(probability=True, random_state=42, C=100, gamma=0.1, kernel='rbf')
+        # model = VotingClassifier(estimators=[('rf', rf), ('svm', svm)], voting='hard')
+        model = RandomForestClassifier(random_state=42, max_depth=None, n_estimators=100, n_jobs=-1,
+                                       max_features='log2')
+        model.fit(X_train, y_train)
+        y_pred = model.predict(X_test)
 
         # 定义参数网格
-        param_grid = {
-            'n_estimators': [50, 100, 200, 500],
-            'max_depth': [None, 5, 10, 20, 30],
-            'min_samples_split': [2, 5, 10],
-            'min_samples_leaf': [1, 2, 4],
-            'max_features': ['auto', 'sqrt', 'log2']
-        }
-
-        # 逻辑回归参数
         # param_grid = {
-        #     'penalty': ['l1', 'l2', 'elasticnet', 'none'],
-        #     'C': [0.1, 1, 10, 100],
-        #     'solver': ['newton-cg', 'lbfgs', 'liblinear', 'sag', 'saga'],
-        #     'max_iter': [100, 200, 500],
-        #     'class_weight': [None, 'balanced']
+        #     'n_estimators': [50, 100, 200, 500],
+        #     'max_depth': [None, 5, 10, 20, 30],
+        #     'max_features': ['auto', 'sqrt', 'log2'],
+        #     'bootstrap': [True, False]
+        # }
+
+        # 定义参数网格
+        # param_grid = {
+        #     'C': [0.1, 1, 10, 100],  # C值
+        #     'gamma': ['scale', 'auto', 0.001, 0.01, 0.1],  # gamma值
+        #     'kernel': ['rbf', 'poly', 'sigmoid']  # 核函数类型
         # }
 
         # 初始化网格搜索
-        grid_search = GridSearchCV(estimator=model, param_grid=param_grid,
-                                   cv=5, n_jobs=-1, verbose=2)
-        grid_search.fit(X_train, y_train)
-        # 输出最佳参数
-        print(f"Best Parameters: {grid_search.best_params_}")
+        # model = RandomForestClassifier(random_state=42)
+        # grid_search = GridSearchCV(estimator=model, param_grid=param_grid,
+        #                            cv=5, n_jobs=-1, verbose=2)
+        # grid_search.fit(X_train, y_train)
+        # # 输出最佳参数
+        # print(f"Best Parameters: {grid_search.best_params_}")
 
         # 使用最佳参数在测试集上进行预测
-        best_rf = grid_search.best_estimator_
-        y_pred = best_rf.predict(X_test)
+        # model = grid_search.best_estimator_
+        # y_pred = model.predict(X_test)
 
         # model.fit(X_train, y_train)
         # y_pred = model.predict(X_test)
@@ -143,7 +161,10 @@ class TechStandardTraining:
         print(classification_report(y_test, y_pred))
 
         # 保存模型
-        joblib.dump(best_rf, TechStandardTraining.MODEL_PATH)
+        joblib.dump(model, TechStandardTraining.MODEL_PATH)
 
         # 保存vectorizer
         joblib.dump(vectorizer, TechStandardTraining.VECTORIZER_PATH)
+
+        # 保存使用和特征索引
+        np.save(TechStandardTraining.FEATURE_INDEX_PATH, feature_indices)
