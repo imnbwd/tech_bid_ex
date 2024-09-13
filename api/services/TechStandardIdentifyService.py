@@ -44,7 +44,9 @@ class TechStandardIdentifyService(ServiceBase):
             self.vectorizer = joblib.load(prefix + 'training/saved_models/tech_standard_vectorizer.joblib')
 
             self.feature_indices = np.load(prefix + 'training/saved_models/tech_standard_features.npy')
+            logger.log("加载模型与分词成功")
         except Exception as e:
+            logger.error("加载模型出错")
             logger.exception(e)
 
     @property
