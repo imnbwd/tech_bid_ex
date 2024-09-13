@@ -1,4 +1,6 @@
 import joblib
+import numpy as np
+
 from api.model import DocRoot, DocumentGroup, Document
 from loguru import logger
 from numpy import ndarray
@@ -6,6 +8,7 @@ from api.services.ServiceBase import ServiceBase
 from typing import Optional, Tuple
 import os
 from api.utility import TextUtils
+import scipy.sparse as sp
 
 
 class TechStandardIdentifyService(ServiceBase):
@@ -39,6 +42,8 @@ class TechStandardIdentifyService(ServiceBase):
             self.model = joblib.load(prefix + 'training/saved_models/tech_standard_model.joblib')
             # 加载vectorizer
             self.vectorizer = joblib.load(prefix + 'training/saved_models/tech_standard_vectorizer.joblib')
+
+            self.feature_indices = np.load(prefix + 'training/saved_models/tech_standard_features.npy')
         except Exception as e:
             logger.exception(e)
 
@@ -49,6 +54,10 @@ class TechStandardIdentifyService(ServiceBase):
     @property
     def get_vectorizer(self):
         return self.vectorizer
+
+    @property
+    def get_feature_index(self):
+        return self.feature_indices
 
     def predict(self, content: str):
         content_vectored = self.vectorizer.transform(content)
@@ -72,6 +81,14 @@ class TechStandardIdentifyService(ServiceBase):
                     doc_paragraphs: list[str] = [para.text for para in doc_data.paragraphs]
                     # 文本转为向量
                     para_vectors = self.vectorizer.transform(doc_paragraphs)
+
+                    # 添加自定义特征
+                    custom_features = [TextUtils.extract_tech_standard_features(para) for para in doc_paragraphs]
+                    vectors = sp.hstack((para_vectors, custom_features))
+
+                    # 使用特征选择
+                    para_vectors = vectors.toarray()[:, self.feature_indices]
+
                     # 使用模型预测
                     doc_check_result: ndarray = self.model.predict(para_vectors)
 
