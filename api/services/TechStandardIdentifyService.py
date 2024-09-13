@@ -56,7 +56,7 @@ class TechStandardIdentifyService(ServiceBase):
         return self.vectorizer
 
     @property
-    def get_feature_index(self):
+    def get_feature_indices(self):
         return self.feature_indices
 
     def predict(self, content: str):
