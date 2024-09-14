@@ -82,17 +82,17 @@ class TechStandardIdentifyService(ServiceBase):
                     # 将原文档中的段落转化为字符串列表以准备检查
                     doc_paragraphs: list[str] = [para.text.strip() for para in doc_data.paragraphs if para.text.strip()]
                     # 文本转为向量
-                    para_vectors = self.vectorizer.transform(doc_paragraphs)
+                    # para_vectors = self.vectorizer.transform(doc_paragraphs)
 
                     # 添加自定义特征
-                    custom_features = [TextUtils.extract_tech_standard_features(para[0]) for para in doc_paragraphs]
-                    para_vectors = sp.hstack((para_vectors, custom_features))
+                    custom_features = [TextUtils.extract_tech_standard_features(para) for para in doc_paragraphs]
+                    #para_vectors = sp.hstack((para_vectors, custom_features))
 
                     # 使用特征选择
-                    para_vectors = para_vectors.toarray()[:, self.feature_indices]
+                    # para_vectors = para_vectors.toarray()[:, self.feature_indices]
 
                     # 使用模型预测
-                    doc_check_result = self.model.predict(para_vectors)
+                    doc_check_result = self.model.predict(custom_features)
 
                     # 进一步判断（提高召回率与精确率）
                     for i, text in enumerate(doc_paragraphs):

@@ -39,25 +39,29 @@ class TechStandardTesting:
 
         print("加载模型成功")
         files = []
-        files.append(r"F:\保利国际广场项目土建及水电安装工程技术标-合稿.json")
-        files.append(r"F:\电力领域.json")
+        # files.append(r"F:\保利国际广场项目土建及水电安装工程技术标-合稿.json")
+        # files.append(r"F:\电力领域.json")
+        files.append(r"F:\石河子大学附属医院技术标.json")
 
         for file_path in files:
             json_data = read_json_file(file_path)
             texts = [text for text in extract_texts_from_json(json_data) if text.strip()]
-            vectors = vectorizer.transform(texts)
+            # vectors = vectorizer.transform(texts)
 
-            custom_features = [TextUtils.extract_tech_standard_features(row[0]) for row in texts]
-            vectors = sp.hstack((vectors, custom_features))
+            custom_features = [TextUtils.extract_tech_standard_features(text) for text in texts]
+            # vectors = sp.hstack((vectors, custom_features))
 
             # 使用特征选择
-            feature_indices = np.load(TechStandardTraining.FEATURE_INDEX_PATH)
-            vectors = vectors.toarray()[:, feature_indices]
+            # feature_indices = np.load(TechStandardTraining.FEATURE_INDEX_PATH)
+            # vectors = vectors.toarray()[:, feature_indices]
 
-            prediction = model.predict(vectors)
+            prediction = model.predict(custom_features)
             for i, text in enumerate(texts):
                 if TextUtils.fit_tech_standard_pattern(text):
                     prediction[i] = 1
+                if TextUtils.not_fit_tech_standard_pattern(text):
+                    prediction[i] = 0
+
 
             for index, value in enumerate(prediction):
                 print(f"{texts[index]}, predict:[{value}]\n")
