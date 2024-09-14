@@ -1,5 +1,5 @@
 import re
-
+from sklearn.naive_bayes import MultinomialNB
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.svm import SVC
@@ -95,24 +95,25 @@ class TechStandardTraining:
         y = [row["label"] for row in training_data]
 
         # 使用TF-IDF向量化文本特征
-        # vectorizer = TfidfVectorizer(tokenizer=TextUtils.chinese_tokenizer, max_features=None)
-        # X_vectorized = vectorizer.fit_transform([' '.join(map(str, row)) for row in X])
+        vectorizer = TfidfVectorizer(tokenizer=TextUtils.chinese_tokenizer, max_features=None)
+        X_vectorized = vectorizer.fit_transform([' '.join(map(str, row)) for row in X])
 
         custom_features = [TextUtils.extract_tech_standard_features(row[0]) for row in X]
-        # X_vectorized = sp.hstack((X_vectorized, custom_features))
+        X_vectorized = sp.hstack((X_vectorized, custom_features))
 
         # 使用特征选择
-        # selector = SelectKBest(f_classif, k=500)  # 选择前n个最重要的特征
-        # X_selected = selector.fit_transform(custom_features, y)
-        # feature_indices = selector.get_support(indices=True)
+        selector = SelectKBest(f_classif, k=200)  # 选择前n个最重要的特征
+        X_selected = selector.fit_transform(X_vectorized, y)
+        feature_indices = selector.get_support(indices=True)
 
         # 划分训练集和测试集0
-        X_train, X_test, y_train, y_test = train_test_split(custom_features, y, test_size=0.2, random_state=42)
+        X_train, X_test, y_train, y_test = train_test_split(X_selected, y, test_size=0.2, random_state=42)
 
         # 训练模型
         svm = SVC(probability=True, random_state=42, C=100, gamma=0.1, kernel='rbf')
         rf = RandomForestClassifier(random_state=42, max_depth=None, n_estimators=100, n_jobs=-1, max_features='log2')
-        model = VotingClassifier(estimators=[('rf', rf), ('svm', svm)], voting='soft')
+        nb = MultinomialNB()
+        model = VotingClassifier(estimators=[('rf', rf), ('svm', svm), ['nb', nb]], voting='soft')
 
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
@@ -164,7 +165,7 @@ class TechStandardTraining:
         joblib.dump(model, TechStandardTraining.MODEL_PATH)
 
         # 保存vectorizer
-        # joblib.dump(vectorizer, TechStandardTraining.VECTORIZER_PATH)
+        joblib.dump(vectorizer, TechStandardTraining.VECTORIZER_PATH)
 
         # 保存使用和特征索引
-        # np.save(TechStandardTraining.FEATURE_INDEX_PATH, feature_indices)
+        np.save(TechStandardTraining.FEATURE_INDEX_PATH, feature_indices)
