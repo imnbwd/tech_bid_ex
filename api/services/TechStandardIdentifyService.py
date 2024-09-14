@@ -95,9 +95,9 @@ class TechStandardIdentifyService(ServiceBase):
                     doc_check_result = self.model.predict(custom_features)
 
                     # 进一步判断（提高召回率与精确率）
-                    for i, text in enumerate(doc_paragraphs):
-                        if TextUtils.fit_tech_standard_pattern(text):
-                            doc_check_result[i] = 1
+                    # for i, text in enumerate(doc_paragraphs):
+                    #     if TextUtils.fit_tech_standard_pattern(text):
+                    #         doc_check_result[i] = 1
 
                     for index, value in enumerate(doc_check_result):
                         if value == 1:

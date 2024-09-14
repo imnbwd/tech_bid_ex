@@ -1,3 +1,5 @@
+import os
+
 from loguru import logger
 import joblib
 from training.trainer.TechStandardTraining import TechStandardTraining
@@ -41,7 +43,18 @@ class TechStandardTesting:
         files = []
         # files.append(r"F:\保利国际广场项目土建及水电安装工程技术标-合稿.json")
         # files.append(r"F:\电力领域.json")
-        files.append(r"F:\石河子大学附属医院技术标.json")
+        # files.append(r"F:\石河子大学附属医院技术标.json")
+        # files.append(r"")
+
+        file_dir = r'D:\标书\技术标\text'
+        # files= [os.path.join(file_dir,item) for item in os.listdir(r"D:\标书\技术标\text") if item.endswith(".json")]
+        # files.append(r"F:\UserData\WXWork\1688850472087313\Cache\File\2024-01\中建一.json")
+        # files.append(r"F:\UserData\WXWork\1688850472087313\Cache\File\2024-01\1002001项目工程总承包投标文件-技术标.json")
+        files.append(r"D:\685.json")
+        # files.append(r"D:\标书\技术标\技术标演示文档\练习文档-技术施组方案1\练习文档-安全管理方案.json")
+        # files.append(r"D:\标书\技术标\技术标演示文档\1.31-施组.json")
+        # files.append(r"D:\标书\技术标\技术标演示文档\1.32-施组.json")
+        # files.append(r"D:\标书\技术标\技术标演示文档\练习文档-总体概述.json")
 
         for file_path in files:
             json_data = read_json_file(file_path)
@@ -56,15 +69,16 @@ class TechStandardTesting:
             # vectors = vectors.toarray()[:, feature_indices]
 
             prediction = model.predict(custom_features)
-            for i, text in enumerate(texts):
-                if TextUtils.fit_tech_standard_pattern(text):
-                    prediction[i] = 1
-                if TextUtils.not_fit_tech_standard_pattern(text):
-                    prediction[i] = 0
+            # for i, text in enumerate(texts):
+            #     # if TextUtils.fit_tech_standard_pattern(text):
+            #     #     prediction[i] = 1
+                # if TextUtils.not_fit_tech_standard_pattern(text):
+                #     prediction[i] = 0
 
 
             for index, value in enumerate(prediction):
-                print(f"{texts[index]}, predict:[{value}]\n")
+                if value == 1:
+                    print(f"{texts[index]}, predict:[{value}]")
                 # if value == 1:
                 #     
                 # else:
