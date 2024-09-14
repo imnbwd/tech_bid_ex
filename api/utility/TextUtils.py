@@ -9,9 +9,9 @@ class TextUtils:
 
     TECH_STANDARD_KEYWORDS = r'规范|标准|条文|法|条例|要求|指南|办法|设计|技术|系统'
     TECH_STANDARD_BUSINESS_KEYWORDS = '城市|电气|建筑|环保|消防|道路|给水|排水|焊接|空调|工程|钢|土|照明|工业'
-    TECH_STANDARD_CODE_KEYWORDS = r'GB|DB|YY|ISO|JB|SL|JT|JG|SY|AQ|CS|IEEE|AS|BS|IE|T'
-    TECH_STANDARD_PATTERN1 = f"^([A-Z0-9/\.\-:]+)\s*[-]?\s*([\u4e00-\u9fa5]{2, 40})$"
-    TECH_STANDARD_PATTERN2 = "^《([\u4e00-\u9fa5]+)》\s*([A-Z0-9\-]+)?$"
+    TECH_STANDARD_CODE_KEYWORDS = r'GB|DB|YY|ISO|JB|SL|JT|JG|SY|AQ|CS|IEEE|AS|BS|IE|T|QG'
+    TECH_STANDARD_PATTERN1 = fr"^([A-Z0-9/\.\-:]+)\s*[-]?\s*([\u4e00-\u9fa5]{4, 40})$"
+    TECH_STANDARD_PATTERN2 = r"^《([\u4e00-\u9fa5]+)》\s*([A-Z0-9\-]+)?$"
 
     @staticmethod
     def chinese_tokenizer(text):
@@ -37,7 +37,7 @@ class TextUtils:
                     int(bool(re.search(r'(?=.*[A-Z].*[A-Z])(?=.*\d{4,10}).*', text))),
                     int(bool(re.search(TextUtils.TECH_STANDARD_PATTERN1, text))),
                     int(bool(re.search(TextUtils.TECH_STANDARD_PATTERN2, text))),
-                    int(bool(re.search(TextUtils.TECH_STANDARD_BUSINESS_KEYWORDS, text))),
+                    int(bool(re.search(f'({TextUtils.TECH_STANDARD_BUSINESS_KEYWORDS})', text))),
                     int(bool(re.search(r'^《[\u4e00-\u9fff]{4,30}》$', text))),
                     len(text),
                     ]
