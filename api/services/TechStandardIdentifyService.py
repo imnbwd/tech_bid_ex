@@ -94,10 +94,12 @@ class TechStandardIdentifyService(ServiceBase):
                     # 使用模型预测
                     doc_check_result = self.model.predict(para_vectors)
 
-                    # 进一步判断（提高召回率）
+                    # 进一步判断（提高召回率与精确率）
                     for i, text in enumerate(doc_paragraphs):
                         if TextUtils.fit_tech_standard_pattern(text):
                             doc_check_result[i] = 1
+                        if TextUtils.not_fit_tech_standard_pattern(text):
+                            doc_check_result[i] = 0
 
                     for index, value in enumerate(doc_check_result):
                         if value == 1:
