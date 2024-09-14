@@ -98,8 +98,6 @@ class TechStandardIdentifyService(ServiceBase):
                     for i, text in enumerate(doc_paragraphs):
                         if TextUtils.fit_tech_standard_pattern(text):
                             doc_check_result[i] = 1
-                        if TextUtils.not_fit_tech_standard_pattern(text):
-                            doc_check_result[i] = 0
 
                     for index, value in enumerate(doc_check_result):
                         if value == 1:
