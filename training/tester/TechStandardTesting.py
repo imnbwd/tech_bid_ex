@@ -1,4 +1,5 @@
 import os
+import re
 
 from loguru import logger
 import joblib
@@ -47,14 +48,16 @@ class TechStandardTesting:
         # files.append(r"")
 
         file_dir = r'D:\标书\技术标\text'
-        # files= [os.path.join(file_dir,item) for item in os.listdir(r"D:\标书\技术标\text") if item.endswith(".json")]
-        # files.append(r"F:\UserData\WXWork\1688850472087313\Cache\File\2024-01\中建一.json")
-        # files.append(r"F:\UserData\WXWork\1688850472087313\Cache\File\2024-01\1002001项目工程总承包投标文件-技术标.json")
+        files = [os.path.join(file_dir, item) for item in os.listdir(r"D:\标书\技术标\text") if item.endswith(".json")]
+        files.append(r"F:\UserData\WXWork\1688850472087313\Cache\File\2024-01\中建一.json")
+        files.append(
+            r"F:\UserData\WXWork\1688850472087313\Cache\File\2024-01\1002001项目工程总承包投标文件-技术标.json")
         files.append(r"D:\685.json")
-        # files.append(r"D:\标书\技术标\技术标演示文档\练习文档-技术施组方案1\练习文档-安全管理方案.json")
-        # files.append(r"D:\标书\技术标\技术标演示文档\1.31-施组.json")
-        # files.append(r"D:\标书\技术标\技术标演示文档\1.32-施组.json")
-        # files.append(r"D:\标书\技术标\技术标演示文档\练习文档-总体概述.json")
+        files.append(r"D:\标书\技术标\技术标演示文档\练习文档-技术施组方案1\练习文档-安全管理方案.json")
+        files.append(r"D:\标书\技术标\技术标演示文档\1.31-施组.json")
+        files.append(r"D:\标书\技术标\技术标演示文档\1.32-施组.json")
+        files.append(r"D:\标书\技术标\技术标演示文档\练习文档-总体概述.json")
+        files.append(r"F:\UserData\WXWork\1688850472087313\Cache\File\2023-05\技术标——天润建业.json")
 
         for file_path in files:
             json_data = read_json_file(file_path)
@@ -69,16 +72,18 @@ class TechStandardTesting:
             # vectors = vectors.toarray()[:, feature_indices]
 
             prediction = model.predict(custom_features)
+
             # for i, text in enumerate(texts):
-            #     # if TextUtils.fit_tech_standard_pattern(text):
-            #     #     prediction[i] = 1
+            #     if prediction[i] == 0:
+            #         if bool(re.search(TextUtils.TECH_STANDARD_CODE_KEYWORDS, text)) or bool(
+            #                 re.search(TextUtils.TECH_STANDARD_KEYWORDS, text)):
+            #             print(text)
                 # if TextUtils.not_fit_tech_standard_pattern(text):
                 #     prediction[i] = 0
 
-
-            for index, value in enumerate(prediction):
-                if value == 1:
-                    print(f"{texts[index]}, predict:[{value}]")
+            # for index, value in enumerate(prediction):
+            #     if value == 1:
+            #         print(f"{texts[index]}, predict:[{value}]")
                 # if value == 1:
                 #     
                 # else:
