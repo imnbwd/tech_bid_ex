@@ -82,11 +82,11 @@ class TechStandardTesting:
                 #     prediction[i] = 0
 
             for index, value in enumerate(prediction):
-                if value == 1:
-                    print(f"{texts[index]}, predict:[{value}]")
+                # if value == 1:
+                #     print(f"{texts[index]}, predict:[{value}]")
 
-                # if value == 0 and len(texts[index]) < 40 and ("《" in texts[index] or "标准" in texts[index] or "GB" in texts[index]):
-                #     print(texts[index])
+                if value == 0 and len(texts[index]) < 40 and ("《" in texts[index] or "标准" in texts[index] or "GB" in texts[index]):
+                    print(texts[index])
 
 
                 # if value == 1:

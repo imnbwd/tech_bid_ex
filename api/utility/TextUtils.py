@@ -11,7 +11,7 @@ class TextUtils:
     TECH_STANDARD_BUSINESS_KEYWORDS = '城市|电气|建筑|环保|消防|道路|给水|排水|焊接|空调|工程|钢|土|照明|工业'
     TECH_STANDARD_CODE_KEYWORDS = 'GB|DB|YY|ISO|JB|SL|JT|JG|SY|AQ|CS|IEEE|AS|BS|IE|T|QG'
     TECH_STANDARD_PATTERN1 = r"^([A-Z0-9/\.\-:]+)\s*[-]?\s*([\u4e00-\u9fa5]{4, 40})$"
-    TECH_STANDARD_PATTERN2 = r"^《([\u4e00-\u9fa5]+)》\s*([\(|（]?([A-Z0-9\-]+)[\)|）]?)?$"
+    TECH_STANDARD_PATTERN2 = r"^《([\u4e00-\u9fa5]+)》\s*([\(|（]?([A-Z0-9/\-年版号]+)[\)|）]?)?$"
 
     @staticmethod
     def chinese_tokenizer(text):
