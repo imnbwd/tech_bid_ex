@@ -96,18 +96,19 @@ class TechStandardTraining:
 
         # 使用TF-IDF向量化文本特征
         vectorizer = TfidfVectorizer(tokenizer=TextUtils.chinese_tokenizer, max_features=None)
-        X_vectorized = vectorizer.fit_transform([' '.join(map(str, row)) for row in X])
+        x_vectorized = vectorizer.fit_transform([' '.join(map(str, row)) for row in X])
 
+        # 提取自定义特征
         custom_features = [TextUtils.extract_tech_standard_features(row[0]) for row in X]
-        X_vectorized = sp.hstack((X_vectorized, custom_features))
+        x_vectorized = sp.hstack((x_vectorized, custom_features))
 
         # 使用特征选择
         selector = SelectKBest(f_classif, k=200)  # 选择前n个最重要的特征
-        X_selected = selector.fit_transform(X_vectorized, y)
+        x_selected = selector.fit_transform(x_vectorized, y)
         feature_indices = selector.get_support(indices=True)
 
         # 划分训练集和测试集0
-        X_train, X_test, y_train, y_test = train_test_split(X_selected, y, test_size=0.2, random_state=42)
+        X_train, X_test, y_train, y_test = train_test_split(x_selected, y, test_size=0.2, random_state=42)
 
         # 训练模型
         svm = SVC(probability=True, random_state=42, C=100, gamma=0.1, kernel='rbf')
@@ -157,7 +158,7 @@ class TechStandardTraining:
         print(f"召回率: {recall:.4f}")
         print(f"F1值: {f1:.4f}")
 
-        # 如果需要更详细的分类报告
+        # 分类报告
         # print("\n分类报告:")
         # print(classification_report(y_test, y_pred))
 
@@ -167,5 +168,5 @@ class TechStandardTraining:
         # 保存vectorizer
         joblib.dump(vectorizer, TechStandardTraining.VECTORIZER_PATH)
 
-        # 保存使用和特征索引
+        # 保存使用的特征索引
         np.save(TechStandardTraining.FEATURE_INDEX_PATH, feature_indices)
